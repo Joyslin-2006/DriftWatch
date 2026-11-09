@@ -1,0 +1,28 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE and operating system
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Dataset files (check redistribution permissions first)
+data/*.csv
+data/batches/*.csv
+data/incoming_samples/*.csv
+
+# Generated monitoring reports
+reports/*_monitoring_report.json
+reports/*_predictions.csv
+
+# Temporary files
+*.log
