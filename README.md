@@ -1,93 +1,145 @@
-# DriftWatch — Fraud Model Monitoring & Observability
+# DriftWatch
+### Fraud Model Monitoring & Observability
 
-An experimental machine learning monitoring application that tracks data quality, feature drift, prediction drift, model performance, and alerts for a fraud detection model.
+**An end-to-end machine learning monitoring dashboard for detecting data quality issues, feature drift, prediction drift, and model performance degradation.**
 
-## Overview
+DriftWatch is a Python-based monitoring application built with Streamlit to demonstrate how a trained fraud detection model can be monitored beyond its initial training and evaluation.
 
-Machine learning models can become less reliable when the data they receive changes over time. This is known as **data drift**. Even when a model continues generating predictions, changes in incoming data or prediction behaviour may indicate that its performance needs attention.
+The project focuses on the post-training ML lifecycle: monitoring incoming transaction batches, identifying changes in data distributions, tracking prediction behaviour, evaluating delayed labels, and generating model health alerts.
 
-**DriftWatch** is a Streamlit-based monitoring dashboard built to demonstrate how a fraud detection model can be monitored after deployment.
+---
 
-Rather than focusing on training a model, this project focuses on the monitoring lifecycle.
+## Project Overview
+
+Machine learning models operate in changing environments. The characteristics of incoming data can differ from the data used during model training, potentially affecting prediction behaviour and model reliability.
+
+DriftWatch addresses this monitoring challenge through an interactive dashboard that evaluates incoming transaction batches against a reference dataset and baseline model performance.
+
+Rather than concentrating on model training, this project explores **ML monitoring, observability, statistical drift detection, and delayed feedback evaluation.**
+
+## Architecture
+
+The following diagram illustrates the end-to-end architecture of DriftWatch, from incoming transaction data to monitoring reports and delayed-label evaluation.
+
+```mermaid
+flowchart TD
+    A["Incoming Transaction Batch"] --> B["Data Ingestion"]
+    R["Reference Dataset"] --> C["Reference Distribution"]
+    M["Trained Random Forest Model"] --> F["Prediction Engine"]
+
+    B --> D["Data Quality Checks"]
+    D --> E["Feature Drift Detection"]
+    C --> E
+
+    B --> F
+    F --> G["Prediction Drift Detection"]
+    P["Reference Predictions"] --> G
+
+    E --> H["Monitoring Results"]
+    G --> H
+    D --> H
+
+    H --> I["Alert Engine"]
+    I --> J["Overall Model Health"]
+
+    F --> K["Saved Predictions"]
+    L["Delayed Actual Labels"] --> N["Performance Evaluation"]
+    K --> N
+    Q["Baseline Metrics"] --> N
+
+    N --> O["Performance Comparison"]
+    O --> I
+
+    H --> S["Monitoring Reports"]
+    O --> S
+    J --> S
+
+    S --> T["Streamlit Dashboard"]
+    T --> U["Overview | Data Monitoring | Prediction Monitoring"]
+    T --> V["Model Performance | Alerts | Monitoring History"]
+```
+
+### Architecture Components
+
+| Component | Responsibility |
+|---|---|
+| Data Ingestion | Accepts incoming transaction batches |
+| Data Quality Checks | Validates incoming data |
+| Feature Drift Detection | Compares incoming feature distributions with reference data |
+| Prediction Engine | Generates fraud predictions using the trained model |
+| Prediction Drift Detection | Monitors changes in prediction distributions |
+| Performance Evaluation | Evaluates predictions when actual labels become available |
+| Alert Engine | Generates alerts and determines overall model health |
+| Monitoring Reports | Stores batch-level monitoring results |
+| Streamlit Dashboard | Presents monitoring information through an interactive interface |
 
 ## Key Features
 
-- **Data Quality Monitoring:** Checks incoming transaction data for quality issues.
-- **Feature Drift Detection:** Compares incoming feature distributions against reference data using Population Stability Index (PSI) and the Kolmogorov–Smirnov (KS) test.
-- **Prediction Drift Monitoring:** Tracks changes in predicted fraud rates and prediction probability distributions.
-- **Delayed-Label Performance Monitoring:** Evaluates model performance when actual transaction labels become available.
-- **Alert Engine:** Generates monitoring alerts and assigns an overall health status.
-- **Monitoring History:** Saves and displays reports from previously monitored batches.
-- **Interactive Dashboard:** Provides separate views for overview, incoming data, data monitoring, prediction monitoring, model performance, history, and alerts.
+### 1. Data Quality Monitoring
+- Validates incoming transaction data.
+- Checks data quality before downstream monitoring.
+- Supports validation of incoming feature schemas.
 
-## Tech Stack
+### 2. Feature Drift Detection
+- Compares incoming feature distributions against reference data.
+- Uses Population Stability Index (PSI).
+- Uses the Kolmogorov–Smirnov (KS) statistical test.
+- Identifies features exhibiting distribution changes.
 
-- Python
-- Pandas and NumPy
-- Scikit-learn
-- SciPy
-- Streamlit
-- Plotly
-- Matplotlib and Seaborn
-- Joblib
+### 3. Prediction Drift Monitoring
+- Tracks changes in predicted fraud rates.
+- Compares current and reference prediction probability distributions.
+- Uses statistical testing to identify prediction drift.
 
-## Project Workflow
+### 4. Delayed-Label Performance Monitoring
+- Supports actual labels arriving after predictions have been generated.
+- Matches actual outcomes with saved predictions using transaction IDs.
+- Evaluates Precision, Recall, F1-score, and PR-AUC.
+- Compares current batch performance against baseline metrics.
 
-1. A trained fraud detection model and reference dataset are loaded.
-2. A new batch of incoming transactions is uploaded.
-3. The data quality checks are performed.
-4. Incoming feature distributions are compared with reference distributions.
-5. The model generates predictions for the incoming batch.
-6. Prediction distributions are monitored for changes.
-7. The monitoring report and predictions are saved.
-8. When actual labels become available, model performance is evaluated.
-9. The alert engine combines monitoring signals and generates an overall health status.
+### 5. Alert Engine
+- Combines data quality, feature drift, prediction drift, and available performance signals.
+- Generates monitoring alerts.
+- Assigns an overall model health status: HEALTHY, WARNING, or CRITICAL.
 
-## Project Structure
+### 6. Interactive Monitoring Dashboard
+- Overview of model health.
+- Incoming transaction batch uploads.
+- Feature-level drift analysis.
+- Prediction distribution monitoring.
+- Delayed-label performance evaluation.
+- Monitoring history and alerts.
 
-```text
-DriftWatch/
-├── data/
-│   ├── creditcard.csv
-│   ├── train.csv
-│   ├── reference.csv
-│   ├── test.csv
-│   ├── batches/
-│   └── incoming_samples/
-├── models/
-│   └── fraud_model.pkl
-├── src/
-│   ├── inspect_data.py
-│   ├── prepare_data.py
-│   ├── train_model.py
-│   ├── save_baseline.py
-│   ├── generate_batches.py
-│   ├── data_quality.py
-│   ├── drift_detection.py
-│   ├── prediction_drift.py
-│   ├── performance_monitor.py
-│   ├── alert_engine.py
-│   ├── monitoring_pipeline.py
-│   └── run_monitor.py
-├── reports/
-├── app.py
-├── requirements.txt
-└── README.md
-```
+## Technology Stack
+
+| Category | Technologies |
+|---|---|
+| Programming Language | Python |
+| Data Processing | Pandas, NumPy |
+| Machine Learning | Scikit-learn |
+| Statistical Analysis | SciPy |
+| Dashboard | Streamlit |
+| Visualization | Plotly, Matplotlib, Seaborn |
+| Model Persistence | Joblib |
+| Version Control | Git, GitHub |
 
 ## Model Information
 
-The project uses a Random Forest classifier trained on a credit card fraud dataset.
+DriftWatch uses a Random Forest classifier trained on a credit card fraud detection dataset.
 
-Model configuration:
+**Model configuration**
 
-- 100 estimators
+- Algorithm: Random Forest Classifier
+- Number of estimators: 100
 - Random state: 42
-- Class weighting: balanced
+- Class weighting: Balanced
+- Parallel processing: Enabled
 
-Baseline test performance:
+### Baseline Model Performance
 
-| Metric | Baseline |
+The following metrics were obtained during the initial test evaluation.
+
+| Evaluation Metric | Baseline Score |
 |---|---:|
 | Precision | 91.53% |
 | Recall | 76.06% |
@@ -95,102 +147,207 @@ Baseline test performance:
 | PR-AUC | 79.67% |
 | ROC-AUC | 95.43% |
 
-The original dataset is highly imbalanced, with fraud representing approximately 0.17% of transactions.
+The original dataset contains a highly imbalanced target distribution, with approximately 0.17% fraudulent transactions.
 
-## Drift Testing
+These baseline metrics are used as a reference when evaluating subsequent transaction batches.
 
-To demonstrate monitoring behaviour, controlled transaction batches were generated.
+## Experimental Drift Scenarios
 
-- Normal batches were sampled from the reference dataset.
-- Drifted batch 1 had its `Amount` feature multiplied by 2.5.
-- Drifted batch 2 had its `Amount` feature multiplied by 4.
+To validate the monitoring pipeline, controlled transaction batches were generated from the reference dataset.
 
-The generated batches contain 1,000 transactions each, including 995 legitimate and 5 fraudulent transactions. This controlled 0.5% fraud proportion is intended for demonstration and is not representative of the original dataset prevalence.
+| Batch Type | Configuration |
+|---|---|
+| Normal Batches | Sampled from reference data |
+| Drifted Batch 1 | Amount multiplied by 2.5 |
+| Drifted Batch 2 | Amount multiplied by 4 |
 
-In one drifted-batch experiment, DriftWatch detected drift in the `Amount` feature while the prediction distribution test did not detect statistically significant prediction drift.
+Each generated batch contains:
 
-This demonstrates that **feature drift does not necessarily imply prediction drift**.
+- 1,000 transactions
+- 995 legitimate transactions
+- 5 fraudulent transactions
 
-## Delayed-Label Evaluation
+The controlled fraud proportion of 0.5% is used for demonstration and differs from the original dataset prevalence.
 
-The application supports a separate labels file containing:
+### Key Experimental Observation
 
-- `transaction_id`
-- `actual_class`
+In the `drift_demo_1` experiment:
 
-DriftWatch matches actual outcomes with saved predictions and evaluates performance using precision, recall, F1-score, and PR-AUC.
+- DriftWatch detected distribution drift in the `Amount` feature.
+- The prediction probability distribution test did not detect statistically significant prediction drift.
+- The current predicted fraud rate was higher than the reference fraud rate.
 
-This simulates a practical monitoring situation in which transaction outcomes become available after predictions have already been generated.
+This demonstrates an important monitoring concept:
+
+**Feature drift does not necessarily imply prediction drift.**
+
+A change in incoming feature distributions does not automatically mean that the model's prediction distribution or predictive performance has degraded.
+
+## Delayed-Label Performance Evaluation
+
+In practical fraud detection scenarios, actual transaction outcomes may not be available when predictions are generated.
+
+DriftWatch simulates this situation by accepting a separate labels CSV after the initial monitoring process.
+
+**Expected labels file format**
+
+| transaction_id | actual_class |
+|---|---:|
+| transaction_001 | 0 |
+| transaction_002 | 1 |
+| transaction_003 | 0 |
+
+The application matches actual outcomes with saved predictions using `transaction_id`.
+
+It then calculates:
+
+- Precision
+- Recall
+- F1-score
+- PR-AUC
+
+### Example: Drifted Batch 1 Performance
+
+| Metric | Baseline | Current Batch |
+|---|---:|---:|
+| Precision | 91.53% | 100.00% |
+| Recall | 76.06% | 80.00% |
+| F1-score | 83.08% | 88.89% |
+| PR-AUC | 79.67% | 100.00% |
+
+**Interpretation:** The monitored batch showed improved metrics compared with the baseline in this experiment, despite the detected feature drift.
+
+However, the batch contained only five fraudulent transactions. Therefore, these results are illustrative and should not be interpreted as evidence of general model improvement.
+
+## Project Structure
+
+```text
+DriftWatch/
+│
+├── data/
+│   ├── batches/
+│   └── incoming_samples/
+│
+├── models/
+│   └── fraud_model.pkl
+│
+├── reports/
+│
+├── src/
+│   ├── inspect_data.py
+│   ├── prepare_data.py
+│   ├── train_model.py
+│   ├── save_baseline.py
+│   ├── generate_batches.py
+│   ├── data_quality.py
+│   ├── test_data_quality.py
+│   ├── drift_detection.py
+│   ├── test_drift_detection.py
+│   ├── prediction_drift.py
+│   ├── test_prediction_drift.py
+│   ├── performance_monitor.py
+│   ├── generate_delayed_labels.py
+│   ├── test_performance_monitor.py
+│   ├── alert_engine.py
+│   ├── monitoring_pipeline.py
+│   ├── test_pipeline.py
+│   └── run_monitor.py
+│
+├── app.py
+├── requirements.txt
+├── README.md
+└── PROJECT_DOCUMENTATION.md
+```
+
+*Note: Dataset files, generated reports, and other runtime artifacts may be stored locally and are not necessarily included in the GitHub repository.*
 
 ## Installation and Setup
 
-### 1. Clone the repository
+### Prerequisites
+
+- Python 3.10 or later
+- Git
+- pip
+
+### 1. Clone the Repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/Joyslin-2006/DriftWatch.git
 cd DriftWatch
 ```
 
-### 2. Create a virtual environment
+### 2. Create a Virtual Environment
 
 ```bash
 python -m venv .venv
 ```
 
-Activate it in Windows PowerShell:
+Activate the environment on Windows PowerShell:
 
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-### 3. Install dependencies
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Prepare the required project files
+### 4. Prepare Project Artifacts
 
-Ensure the required dataset, reference data, trained model, and supporting files are present in their expected folders.
+Ensure the required dataset, reference data, trained model, and baseline metrics are available in their expected directories.
 
-If setting up from the original dataset, run the data preparation, model training, baseline generation, and batch-generation scripts in the appropriate order.
+If starting from the original dataset, execute the preparation, training, baseline generation, and batch-generation scripts in the appropriate order.
 
-### 5. Launch the dashboard
+### 5. Launch DriftWatch
 
 ```bash
 streamlit run app.py
 ```
 
-The Streamlit application will open in your browser.
+The application will open in your browser.
 
-## How to Use
+## How to Use DriftWatch
 
-1. Open **Incoming Data**.
-2. Upload a CSV containing transaction IDs and model features.
-3. Enter a batch name and run monitoring.
-4. Inspect the results in Overview, Data Monitoring, Prediction Monitoring, and Alerts.
-5. Open Model Performance when actual labels become available.
-6. Upload the corresponding labels CSV and evaluate performance.
-7. Review previous runs in Monitoring History.
+1. Launch the Streamlit application.
+2. Navigate to **Incoming Data**.
+3. Upload a transaction batch containing the required transaction ID and model features.
+4. Enter a batch name and run monitoring.
+5. Review overall health and monitoring results in **Overview**.
+6. Inspect feature-level changes in **Data Monitoring**.
+7. Examine prediction distributions in **Prediction Monitoring**.
+8. Upload the corresponding actual labels when they become available.
+9. Evaluate model performance in **Model Performance**.
+10. Review saved results in **Monitoring History** and **Alerts**.
 
-## Important Notes and Limitations
+## Limitations
 
-- This is an experimental portfolio project, not a production deployment.
-- The generated batches are controlled test data.
-- Performance metrics from batches containing only five fraud examples can vary significantly and should be interpreted cautiously.
-- A detected feature drift does not automatically mean model performance has degraded.
-- Monitoring results should be interpreted alongside sample sizes, business context, and actual outcomes.
-- The project demonstrates monitoring concepts; it does not implement a complete production model-serving or automated retraining system.
+- This is an experimental portfolio project and not a production deployment.
+- Controlled batches are used to demonstrate monitoring behaviour.
+- Each generated evaluation batch contains only five fraud examples, so batch-level performance metrics can be unstable.
+- Feature drift does not automatically indicate model performance degradation.
+- Statistical drift tests should be interpreted alongside sample sizes and business context.
+- The project does not currently implement automated model retraining, production model serving, or a live banking transaction integration.
 
-## Future Improvements
+## Future Enhancements
 
-- Add configurable drift thresholds.
-- Add more detailed monitoring and alert history.
-- Support larger and more realistic evaluation batches.
-- Add automated monitoring schedules.
-- Add model version tracking.
-- Add deployment using Streamlit Community Cloud or another hosting platform.
+- Configurable drift detection thresholds.
+- Scheduled and automated monitoring.
+- Model version tracking.
+- More realistic evaluation datasets and larger batch sizes.
+- Enhanced alert history and notification integration.
+- Cloud deployment and monitoring.
+- Automated model retraining workflows.
 
 ## Author
 
-Developed as a hands-on machine learning portfolio project to explore model monitoring, data drift, prediction drift, delayed feedback, and ML observability.
+**Joyslin**
+
+Developed as a hands-on machine learning engineering project exploring ML observability, statistical drift detection, delayed feedback, and model performance monitoring.
+
+---
+
+**Project:** DriftWatch — Fraud Model Monitoring & Observability
+
+**Repository:** [GitHub – DriftWatch](https://github.com/Joyslin-2006/DriftWatch)
