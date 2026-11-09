@@ -19,60 +19,50 @@ Rather than concentrating on model training, this project explores **ML monitori
 
 ## Architecture
 
-The following diagram illustrates the end-to-end architecture of DriftWatch, from incoming transaction data to monitoring reports and delayed-label evaluation.
+DriftWatch follows a simple monitoring workflow that takes incoming transaction data, performs model monitoring, evaluates performance, and displays the results through an interactive dashboard.
+
+### System Architecture
 
 ```mermaid
 flowchart TD
-    A["Incoming Transaction Batch"] --> B["Data Ingestion"]
-    R["Reference Dataset"] --> C["Reference Distribution"]
-    M["Trained Random Forest Model"] --> F["Prediction Engine"]
+    A["1. Data Sources<br/>Reference Data + Incoming Transactions"]
+    B["2. Monitoring Pipeline<br/>Data Quality + Feature Drift"]
+    C["3. Prediction Monitoring<br/>Fraud Predictions + Prediction Drift"]
+    D["4. Evaluation & Alerts<br/>Delayed Labels + Performance Metrics"]
+    E["5. Streamlit Dashboard<br/>Overview + Monitoring Results + Alerts + History"]
 
-    B --> D["Data Quality Checks"]
-    D --> E["Feature Drift Detection"]
-    C --> E
-
-    B --> F
-    F --> G["Prediction Drift Detection"]
-    P["Reference Predictions"] --> G
-
-    E --> H["Monitoring Results"]
-    G --> H
-    D --> H
-
-    H --> I["Alert Engine"]
-    I --> J["Overall Model Health"]
-
-    F --> K["Saved Predictions"]
-    L["Delayed Actual Labels"] --> N["Performance Evaluation"]
-    K --> N
-    Q["Baseline Metrics"] --> N
-
-    N --> O["Performance Comparison"]
-    O --> I
-
-    H --> S["Monitoring Reports"]
-    O --> S
-    J --> S
-
-    S --> T["Streamlit Dashboard"]
-    T --> U["Overview | Data Monitoring | Prediction Monitoring"]
-    T --> V["Model Performance | Alerts | Monitoring History"]
+    A --> B
+    B --> C
+    C --> D
+    D --> E
 ```
 
 ### Architecture Components
 
-| Component | Responsibility |
+| Component | Description |
 |---|---|
-| Data Ingestion | Accepts incoming transaction batches |
-| Data Quality Checks | Validates incoming data |
-| Feature Drift Detection | Compares incoming feature distributions with reference data |
-| Prediction Engine | Generates fraud predictions using the trained model |
-| Prediction Drift Detection | Monitors changes in prediction distributions |
-| Performance Evaluation | Evaluates predictions when actual labels become available |
-| Alert Engine | Generates alerts and determines overall model health |
-| Monitoring Reports | Stores batch-level monitoring results |
-| Streamlit Dashboard | Presents monitoring information through an interactive interface |
+| **1. Data Sources** | Provides the reference dataset and incoming transaction batches for monitoring. |
+| **2. Monitoring Pipeline** | Validates incoming data quality and compares feature distributions against reference data to identify drift. |
+| **3. Prediction Monitoring** | Uses the trained Random Forest model to generate fraud predictions and monitors changes in prediction distributions. |
+| **4. Evaluation & Alerts** | Evaluates model performance when actual labels become available, compares results with baseline metrics, and generates model health alerts. |
+| **5. Streamlit Dashboard** | Displays overall model health, data drift, prediction monitoring, performance metrics, alerts, and monitoring history. |
 
+### End-to-End Workflow
+
+1. **Data Input:** Load reference data and upload a new transaction batch.
+2. **Data Monitoring:** Perform data quality checks and detect changes in incoming feature distributions.
+3. **Prediction Monitoring:** Generate fraud predictions and compare current prediction behaviour with reference predictions.
+4. **Performance Evaluation:** When actual transaction labels become available, evaluate model performance using Precision, Recall, F1-score, and PR-AUC.
+5. **Reporting & Visualization:** Generate monitoring reports, produce alerts, and display results through the Streamlit dashboard.
+
+### Monitoring Lifecycle
+
+DriftWatch supports two stages of monitoring:
+
+- **Before actual labels are available:** Data quality, feature drift, prediction drift, and initial model health are monitored.
+- **After actual labels become available:** Model performance is evaluated against the actual transaction outcomes and compared with baseline performance.
+
+This workflow demonstrates how machine learning models can be monitored beyond their initial training and evaluation.
 ## Key Features
 
 ### 1. Data Quality Monitoring
